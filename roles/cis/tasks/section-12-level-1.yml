@@ -50,7 +50,7 @@
     - manual_remediation
 
 - name: 12.10 Find SUID System Executables (Not Scored)
-  shell: df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -4000 -print
+  shell: df --local -P | grep -v user |awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -4000 -print
   register: command_result
   failed_when: '((command_result.stdout_lines | difference(allowed_suid_binaries)) | length) > 0'
   tags:
@@ -59,7 +59,7 @@
     - manual_remediation
 
 - name: 12.11 Find SGID System Executables (Not Scored)
-  shell: df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -2000 -print
+  shell: df --local -P | grep -v user | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -2000 -print
   register: command_result
   failed_when: '((command_result.stdout_lines | difference(allowed_sgid_binaries)) | length) > 0'
   tags:
