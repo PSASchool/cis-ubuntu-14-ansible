@@ -46,10 +46,13 @@
     - section4.4
 
 - name: 4.5 Activate AppArmor (Scored)
-  apt: name={{ item }} update_cache=yes state=present
-  with_items:
-    - apparmor
-    - apparmor-utils
+  apt: 
+    name: "{{ packages }}" 
+    update_cache: yes 
+  vars:
+    packages:
+      - apparmor
+      - apparmor-utils
   notify: enforce apparmor profiles
   tags:
     - scored
