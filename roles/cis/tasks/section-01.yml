@@ -7,8 +7,16 @@
     - notscored
     - section1.1
 
+# - name: Check if reboot is required
+#   shell: if [[ $(readlink -f /vmlinuz) != /boot/vmlinuz-$(uname -r) ]]; then echo "reboot required"; else echo "no"; fi
+#   register: reboot_required
+#   tags:
+#     - notscored
+#     - section1.1
+
 - name: Check if reboot is required
-  shell: if [[ $(readlink -f /vmlinuz) != /boot/vmlinuz-$(uname -r) ]]; then echo "reboot required"; else echo "no"; fi
+  stat:
+    path: /var/run/reboot-required
   register: reboot_required
   tags:
     - notscored
@@ -17,6 +25,7 @@
 - name: Reboot host to apply updates
   reboot:
     reboot_timeout: 3600
+  when: reboot_required.stat.exists   
   tags:
     - notscored
     - section1.1
