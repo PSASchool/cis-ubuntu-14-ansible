@@ -56,11 +56,13 @@
       apt:
         name: "{{ packages_to_add }}"
         state: latest
+        update_cache: yes
       vars:
         packages_to_add:
           - auditd
           - clamav
           - libpam-cracklib
+          - libpam-pwquality
           - bum
           - gufw
           - chkrootkit
