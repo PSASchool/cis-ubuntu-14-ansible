@@ -1,8 +1,9 @@
 ---
 
-- name: Harden host1 
+- name: Harden Ubuntu 14.04 
   hosts: all
   become: yes
+  # ansible-playbook -i 192.168.20.xxx, cis.yml -u user_name_here -k -K 
   vars:
     remove_x_window: "no"
     allowed_sgid_binaries:
@@ -49,33 +50,44 @@
       - /usr/bin/chsh
       - /usr/bin/gpasswd
 
-
   pre_tasks:
-
-
     # Package management AND use all list elements in one command https://docs.ansible.com/ansible/latest/apt_module.html      
     - name: Install packages
       apt:
-        name: "{{ packages }}"
-        update_cache: yes
+        name: "{{ packages_to_add }}"
+        state: latest
       vars:
-        packages:
+        packages_to_add:
           - auditd
           - clamav
-          - libpam-cracklib          
-        
+          - libpam-cracklib
+          - bum
+          - gufw
+          - chkrootkit
+          - unhide
+          - rkhunter          
+
     - name: Remove packages
       apt:
-        name: "{{ packages }}"
+        name: "{{ packages_to_remove }}"
         state: absent
       vars:
-        packages:
+        packages_to_remove:
           - tpcdump
           - nmap
           - samba
           - nmbd
           - popularity-contest
-          - hydra          
+          - wireshark
+          - john
+          - hydra
+          - ophcrack
+          - netcat
+          - netcat-traditional
+          - netcat-openbsd
+          - unicornscan
+          - aircrack-ng
+          - hydra-gtk          
         
     # Check updates daily https://ubuntuforums.org/showthread.php?t=2330407
     - name: Check updates daily    
@@ -83,6 +95,18 @@
         path: /etc/apt/apt.conf.d/10periodic
         regexp: '^APT::Periodic::Update-Package-Lists "0";'
         line: 'APT::Periodic::Update-Package-Lists "1";'
+    - name: Find /home files .mp3 
+      find:
+        paths: /home
+        patterns: "*.mp3 *.mp4 *.wav"
+        recurse: yes
+      register: files_to_delete
+
+    - name: Drop the music files
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ files_to_delete.files }}"
 
   roles:
     - cis
