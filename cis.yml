@@ -1,10 +1,89 @@
 ---
-# file: cis.yml
 
-- hosts: all
+- name: Harden host1 
+  hosts: all
   become: yes
-  user: provisioner
-  roles:
-    - { role: cis, when: ansible_distribution=="Ubuntu" and ansible_distribution_version=="14.04" }
+  vars:
+    remove_x_window: "no"
+    allowed_sgid_binaries:
+      - /sbin/unix_chkpwd
+      - /usr/lib/libvte-2.90-9/gnome-pty-helper
+      - /usr/lib/evolution/camel-lock-helper-1.2
+      - /usr/lib/utempter/utempter
+      - /usr/sbin/uuidd
+      - /usr/sbin/postdrop
+      - /usr/sbin/postqueue
+      - /usr/bin/mail-lock
+      - /usr/bin/mail-touchlock
+      - /usr/bin/wall
+      - /usr/bin/bsd-write
+      - /usr/bin/chage
+      - /usr/bin/ssh-agent
+      - /usr/bin/crontab
+      - /usr/bin/expiry
+      - /usr/bin/dotlockfile
+      - /usr/bin/mail-unlock
+      - /usr/bin/mlocate      
+    allowed_suid_binaries:
+      - /bin/umount
+      - /bin/ping6
+      - /bin/mount
+      - /bin/ping
+      - /bin/su
+      - /bin/fusermount
+      - /usr/lib/openssh/ssh-keysign
+      - /usr/lib/policykit-1/polkit-agent-helper-1
+      - /usr/lib/x86_64-linux-gnu/oxide-qt/chrome-sandbox
+      - /usr/lib/eject/dmcrypt-get-device
+      - /usr/lib/dbus-1.0/dbus-daemon-launch-helper
+      - /usr/sbin/uuidd
+      - /usr/sbin/pppd
+      - /usr/bin/traceroute6.iputils
+      - /usr/bin/chfn
+      - /usr/bin/sudo
+      - /usr/bin/lppasswd
+      - /usr/bin/mtr
+      - /usr/bin/newgrp
+      - /usr/bin/passwd
+      - /usr/bin/pkexec
+      - /usr/bin/chsh
+      - /usr/bin/gpasswd
 
-# vim: set sw=2 ts=2:
+
+  pre_tasks:
+
+
+    # Package management AND use all list elements in one command https://docs.ansible.com/ansible/latest/apt_module.html      
+    - name: Install packages
+      apt:
+        name: "{{ packages }}"
+        update_cache: yes
+      vars:
+        packages:
+          - auditd
+          - clamav
+          - libpam-cracklib          
+        
+    - name: Remove packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - tpcdump
+          - nmap
+          - samba
+          - nmbd
+          - popularity-contest
+          - hydra          
+        
+    # Check updates daily https://ubuntuforums.org/showthread.php?t=2330407
+    - name: Check updates daily    
+      lineinfile:
+        path: /etc/apt/apt.conf.d/10periodic
+        regexp: '^APT::Periodic::Update-Package-Lists "0";'
+        line: 'APT::Periodic::Update-Package-Lists "1";'
+
+  roles:
+    - cis
+

@@ -65,7 +65,7 @@
     - section6.4
 
 - name: 6.5 Configure Network Time Protocol (NTP) (Scored)
-  apt: name=ntp update_cache=yes state=installed
+  apt: name=ntp update_cache=yes state=present
   tags:
     - scored
     - section6.5

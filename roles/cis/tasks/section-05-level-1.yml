@@ -58,8 +58,11 @@
     - section5.1.4
 
 - name: 5.1.5 Ensure talk client is not installed (Scored)
-  apt: name={{ item }} purge=yes state=absent
-  with_items:
+  apt: 
+    name: "{{ packages }}" 
+    purge: yes 
+    state: absent
+  packages:
     - talk
     - ntalk
   tags:
